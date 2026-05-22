@@ -12,15 +12,7 @@ No cloud account needed. No cost. Runs on your laptop.
 
 ## Architecture
 
-```
-GitHub Repo
-    ↓ (ArgoCD syncs ClusterProfiles)
-mgmt cluster (vind)
-    ↓ (Sveltos deploys based on labels)
-dev cluster (vind)     → podinfo green, 2 replicas
-staging cluster (vind) → podinfo blue, 2 replicas
-```
-[Architecture](docs/architecture.png)
+![Architecture](docs/architecture.png)
 
 ## Prerequisites
 
