@@ -19,4 +19,4 @@ spec:
         replicaCount: 2
         ui:
           color: "4285F4"
-          message: "Running on STAGING"
+          message: "STAGING v2"
