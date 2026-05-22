@@ -11,12 +11,15 @@ No cloud account needed. No cost. Runs on your laptop.
 - Full GitOps loop: push to Git → ArgoCD syncs → Sveltos deploys
 
 ## Architecture
+
+\```
 GitHub Repo
-↓ (ArgoCD syncs ClusterProfiles)
+    ↓ (ArgoCD syncs ClusterProfiles)
 mgmt cluster (vind)
-↓ (Sveltos deploys based on labels)
+    ↓ (Sveltos deploys based on labels)
 dev cluster (vind)     → podinfo green, 2 replicas
 staging cluster (vind) → podinfo blue, 2 replicas
+\```
 
 ## Prerequisites
 
