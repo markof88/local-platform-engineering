@@ -20,6 +20,7 @@ mgmt cluster (vind)
 dev cluster (vind)     → podinfo green, 2 replicas
 staging cluster (vind) → podinfo blue, 2 replicas
 ```
+[Architecture](docs/architecture.png)
 
 ## Prerequisites
 
