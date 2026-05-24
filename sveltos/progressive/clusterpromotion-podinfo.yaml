@@ -1,0 +1,35 @@
+apiVersion: config.projectsveltos.io/v1beta1
+kind: ClusterPromotion
+metadata:
+  name: podinfo-rollout
+spec:
+  profileSpec:
+    syncMode: Continuous
+    helmCharts:
+    - repositoryURL: https://stefanprodan.github.io/podinfo
+      repositoryName: podinfo
+      chartName: podinfo/podinfo
+      chartVersion: 6.12.0
+      releaseName: podinfo
+      releaseNamespace: podinfo
+      helmChartAction: Install
+      values: |
+        replicaCount: 2
+        ui:
+          color: "#34A853"
+          message: "Progressive rollout v1"
+  stages:
+  - name: dev
+    clusterSelector:
+      matchLabels:
+        env: dev
+    trigger:
+      auto:
+        delay: 2m
+  - name: staging
+    clusterSelector:
+      matchLabels:
+        env: staging
+    trigger:
+      auto:
+        delay: 2m
