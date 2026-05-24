@@ -14,10 +14,10 @@ spec:
       releaseNamespace: podinfo
       helmChartAction: Install
       values: |
-        replicaCount: 2
+        replicaCount: true
         ui:
           color: "#34A853"
-          message: "Progressive rollout v1"
+          message: "Progressive rollout v2 - broken"
   stages:
   - name: dev
     clusterSelector:
