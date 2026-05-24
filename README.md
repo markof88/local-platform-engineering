@@ -6,13 +6,9 @@ No cloud account needed. No cost. Runs on your laptop.
 ## What this demo shows
 
 - Multiple Kubernetes clusters running locally using vind (vCluster in Docker)
-- Sveltos managing deployments across clusters using label-based targeting
-- ArgoCD bootstrapped by Sveltos for GitOps sync
-- Full GitOps loop: push to Git → ArgoCD syncs → Sveltos deploys
-
-## Architecture
-
-![Architecture](docs/architecture.png)
+- Sveltos managing progressive rollouts across clusters using ClusterPromotion
+- ArgoCD for GitOps sync. Installed as platform infrastructure, not managed by Sveltos
+- Full GitOps loop: push to Git → ArgoCD syncs → Sveltos deploys progressively
 
 ## Prerequisites
 
@@ -21,6 +17,21 @@ No cloud account needed. No cost. Runs on your laptop.
 - kubectl
 - helm
 - sveltosctl v1.10.0+
+
+## Architecture
+
+![Architecture](docs/architecture.png)
+
+## Repository Structure
+
+```
+bootstrap/
+├── install-argocd.sh          # Run once to install ArgoCD
+└── argocd-app-sveltos.yaml    # Run once to connect ArgoCD to this repo
+sveltos/
+└── progressive/
+└── clusterpromotion-podinfo.yaml  # Progressive rollout definition
+```
 
 ## Installation
 
@@ -118,14 +129,14 @@ sveltosctl register cluster \
 kubectl get sveltoscluster -A --show-labels
 ```
 
-### 8. Apply Sveltos ClusterProfiles
+### 8. Bootstrap ArgoCD
 
 ```bash
-kubectl apply -f sveltos/mgmt/clusterprofile-argocd.yaml
-kubectl apply -f sveltos/mgmt/argocd-app-sveltos.yaml
+bash bootstrap/install-argocd.sh
+kubectl apply -f bootstrap/argocd-app-sveltos.yaml
 ```
 
-Sveltos installs ArgoCD on mgmt. ArgoCD then syncs the ClusterProfiles from this repo to mgmt. Sveltos deploys podinfo to dev and staging automatically.
+ArgoCD syncs Sveltos resources from this repo. Sveltos handles progressive rollouts to dev and staging automatically.
 
 ## Verify
 
@@ -133,15 +144,15 @@ Sveltos installs ArgoCD on mgmt. ArgoCD then syncs the ClusterProfiles from this
 # Check all clusters are ready
 kubectl get sveltoscluster -A
 
-# Check deployments
-kubectl get clustersummary -A
+# Check progressive rollout status
+kubectl get clusterpromotion podinfo-rollout -o yaml | grep -A 20 status
 
-# Access podinfo on dev (green)
+# Access podinfo on dev
 export KUBECONFIG=/tmp/dev.yaml
 kubectl port-forward svc/podinfo 9898:9898 -n podinfo
 open http://localhost:9898
 
-# Access podinfo on staging (blue)
+# Access podinfo on staging
 export KUBECONFIG=/tmp/staging.yaml
 kubectl port-forward svc/podinfo 9898:9898 -n podinfo
 open http://localhost:9898
@@ -149,19 +160,19 @@ open http://localhost:9898
 
 ## GitOps in action
 
-To see the full GitOps loop working, edit any ClusterProfile in `sveltos/clusters/` and push to main. ArgoCD will sync the change to mgmt within 3 minutes. Sveltos will propagate it to the target clusters automatically.
+Edit `sveltos/progressive/clusterpromotion-podinfo.yaml` and push to main. ArgoCD syncs the change to mgmt. Sveltos deploys to dev first, waits 2 minutes, then promotes to staging automatically.
 
 ## Key gotchas
 
 1. Use `sudo vcluster create` on Mac for LoadBalancer support
-2. Each vCluster gets its own isolated Docker network — shared network is required
+2. Each vCluster gets its own isolated Docker network. Shared network is required
 3. vCluster API server listens on port `8443` not `6443`
 4. Use localhost kubeconfigs for local kubectl access, container IPs for Sveltos registration
-5. Sveltos `values` field requires pipe `|` — nested YAML map will not work
+5. Sveltos `values` field requires pipe `|` , nested YAML map will not work
 
 ## Tools used
 
-- [vind](https://github.com/loft-sh/vcluster) - vCluster in Docker
-- [Sveltos](https://github.com/projectsveltos/sveltos) - Kubernetes add-on controller
-- [ArgoCD](https://argoproj.github.io/cd/) - GitOps continuous delivery
-- [Podinfo](https://github.com/stefanprodan/podinfo) - Demo microservice
+- [vind](https://github.com/loft-sh/vcluster) | vCluster in Docker
+- [Sveltos](https://github.com/projectsveltos/sveltos) | Kubernetes add-on controller
+- [ArgoCD](https://argoproj.github.io/cd/) | GitOps continuous delivery
+- [Podinfo](https://github.com/stefanprodan/podinfo) | Demo microservice
