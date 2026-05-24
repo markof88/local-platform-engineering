@@ -8,7 +8,9 @@ spec:
   source:
     repoURL: https://github.com/markof88/local-platform-engineering.git
     targetRevision: HEAD
-    path: sveltos/clusters
+    path: sveltos
+    directory:
+      recurse: true
   destination:
     server: https://kubernetes.default.svc
     namespace: default
